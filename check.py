@@ -30,8 +30,9 @@ FONTTEST_VARIATION = FONTTEST_NAMESPACE + "var"
 
 
 class ConformanceChecker:
-    def __init__(self, command):
+    def __init__(self, command, font_dir):
         self.engine = "Stormlicht"
+        self.font_dir = font_dir
         self.command = command
         self.datestr = self.make_datestr()
         self.reports = {}  # filename --> HTML ElementTree
@@ -49,7 +50,7 @@ class ConformanceChecker:
 
     def make_command(self, e):
         testcase = e.attrib[FONTTEST_ID]
-        font = os.path.join("fonts", e.attrib[FONTTEST_FONT])
+        font = os.path.join(self.font_dir, e.attrib[FONTTEST_FONT])
         render = e.attrib.get(FONTTEST_RENDER)
         variation = e.attrib.get(FONTTEST_VARIATION)
         command = [
@@ -207,9 +208,12 @@ def main():
     parser.add_argument(
         "--testcases", help="path to the testcase directory", required=True
     )
+    parser.add_argument(
+        "--font", help="path to the font directory", required=True
+    )
     args = parser.parse_args()
 
-    checker = ConformanceChecker(command=args.engine)
+    checker = ConformanceChecker(command=args.engine, font=args.font)
     for filename in sorted(os.listdir(args.testcases), key=sortkey):
         if filename == "index.html" or not filename.endswith(".html"):
             continue
